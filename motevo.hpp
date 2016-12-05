@@ -19,11 +19,16 @@ public:
   //Main constructor
   Cmotevo(const vector<dynamic_bitset<>> sites_sigma_, const vector<dynamic_bitset<>> sites_lexA_,
 	  const vector<double> weight_sites_sigma_, const vector<double> weight_sites_lexA_):
+    nrow_W(sites_sigma_.size()+1), //+1 because there is also the configurations with 0 sigma70 bound
+    ncol_W(sites_lexA_.size()+1),
     sites_sigma(sites_sigma_),
     sites_lexA(sites_lexA_),
     weight_sites_sigma(weight_sites_sigma_),
     weight_sites_lexA(weight_sites_lexA_)
   {return;}
+
+  //Main destructor
+  ~Cmotevo(void);
   
   //This is the main function
   void generate_W(void);
@@ -37,12 +42,12 @@ public:
   //Print the W matrices in a R format
   void print_W_R(bool active=true); //print activ eor inactive?
 
-  //Print the W matrices in a Mathematica format
-  void print_W_Mathematica(bool active=true);
-  
   //Compute the probability to be active
   double compute_P(double C_sigma, double C_lexA);
   
+  //Dimensions of the matrices W
+  unsigned int nrow_W,  ncol_W;
+
 private:
   vector<dynamic_bitset<>> sites_sigma, sites_lexA;
   vector<double> weight_sites_sigma, weight_sites_lexA;

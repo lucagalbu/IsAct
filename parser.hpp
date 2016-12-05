@@ -1,6 +1,5 @@
 /*ToDo:
--take the exp of the energy. Now I'm just taking the number from the file
--Remove C_sigma and C_lexA? (they are already commented out)
+-one easy improvement is to remove all the zeros at the beginning of the sequences
 */
 
 #ifndef __PARSER
@@ -49,8 +48,6 @@ private:
   
   //These vars are read from the command line
   string filename, sigma_name, lexA_name, sigma_strand;
-  //double C_sigma, C_lexA;
-  int tss;
   int sigma_right, sigma_left, lexA_right, lexA_left;
   double thres_sigma, thres_lexA;
 

@@ -10,9 +10,6 @@ void CParser::ParseOptions(void){
       ("lexA", value<string>(&lexA_name)->default_value("LexA"), "Identifier of LexA")
       ("verbose", value<bool>(&verbose)->default_value(true), "Print information on the standard error output")
       ("strand", value<string>(&sigma_strand)->default_value("+"), "Direction of sigma transcription")
-      // ("Csigma", value<double>(&C_sigma)->default_value(1), "Concentration of sigma70")
-      // ("ClexA",  value<double>(&C_lexA)->default_value(1), "Concentration of lexA")
-      ("TSS",    value<int>(&tss)->default_value(0), "Position of the Tss")
       ("sigma_right", value<int>(&sigma_right)->default_value(0), "How much sigma 70 sites are extended to the right")
       ("sigma_left",  value<int>(&sigma_left)->default_value(0), "How much sigma 70 sites are extended to the left")
       ("lexA_right", value<int>(&lexA_right)->default_value(0), "How much lexA sites are extended to the right")
@@ -43,10 +40,7 @@ void CParser::print_cmdline(void){
   cerr << "Filename: " << filename << endl;
   cerr << "Identifier of sigma70: " << sigma_name << endl;
   cerr << "Identifier of lexA: " << lexA_name << endl;
-  //  cerr << "Sigma concentration: " << C_sigma << endl;
-  // cerr << "LexA concentration: " << C_lexA << endl;
   cerr << "Sigma transcription direction: " << sigma_strand << endl;
-  cerr << "Transcription starting site: " << tss << endl;
   cerr << "Sigma binding site extensions [left, right]: [" << sigma_left << ", " << sigma_right << "]" << endl;
   cerr << "LexA binding site extensions [left, right]: [" << lexA_left << ", " << lexA_right << "]" << endl;
   cerr << "Discard all sigma binding sites whose energy is lower than: " << thres_sigma << endl;
@@ -67,6 +61,9 @@ void CParser::ParseFile(void){
   double posterior, energy;
   string alignment, promoter, WM, sequence, strand;
   
+  //At the beginning I have a sequence of length 0. This value will be update everytime I add a new site
+  file_params.seq_length = 0; 
+
   while(file>>tmp_str){
     //Site start and end
     size_t next;
@@ -83,6 +80,7 @@ void CParser::ParseFile(void){
       file_params.sites_sigma_start.push_back(site_start);
       file_params.sites_sigma_end.push_back(site_end);
       file_params.energy_sigma.push_back(energy);
+      if(site_end>file_params.seq_length) file_params.seq_length = site_end;
     }
     else if(alignment.find(lexA_name)!=string::npos){ // If this is a LexA
       //I don't want lexA with too low energy
@@ -90,6 +88,7 @@ void CParser::ParseFile(void){
       file_params.sites_lexA_start.push_back(site_start);
       file_params.sites_lexA_end.push_back(site_end);
       file_params.energy_lexA.push_back(energy);
+      if(site_end>file_params.seq_length) file_params.seq_length = site_end;
     }
     else{
       cerr << "ERROR: FILE READING STOPPED AT:" << endl;
@@ -103,11 +102,7 @@ void CParser::ParseFile(void){
       cerr << "Promoter: " << promoter << endl << endl;
       exit(1);
     }
-  }
-
-  //Find length of the sequence (motevo returns ordered sites, so last position of the seq is just the last number in
-  //site_end
-  file_params.seq_length = site_end; 
+  } 
   
   file.close();
   return;
@@ -125,10 +120,10 @@ void CParser::CreateSites(vector<dynamic_bitset<>>& sites, vector<double>& weigh
   //Populate the vector with bitsets.
   //I use vectors so I can use a non-default constructor (I need it to specify the size of each bitset,
   //i.e. the length of the seq)
-  for (int i = 0; i < energy.size(); ++i)  sites.emplace_back(seq_length+1); //+1 to contain also element 0
+  for (unsigned int i = 0; i < energy.size(); ++i)  sites.emplace_back(seq_length+1); //+1 to contain also element 0
 
   //In every bitset store one site
-  for(int i=0; i<sites.size(); i++){
+  for(unsigned int i=0; i<sites.size(); i++){
     weights.push_back(exp(energy[i])); //PUT EXPONENTIAL IN FINAL VERSION!!!
     for(int j=sites_start[i]; j<=sites_end[i]; j++){
       sites[i].set(seq_length-j); //seq_length-j because sets from right
@@ -159,7 +154,7 @@ void CParser::print_params(void){
   cerr << endl << "Energy of lexA binding sites: " << endl;
   for(auto i = file_params.energy_lexA.begin(); i!=file_params.energy_lexA.end(); i++)
     cerr << *i << ' ';
-  cerr << endl << "---------------------------------------------------------" << endl;
+  cerr << endl;
 }
 
 void CParser::start_parsing(void)

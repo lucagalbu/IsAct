@@ -1,5 +1,14 @@
 #include "motevo.hpp"
 
+Cmotevo::~Cmotevo(void){
+  for(unsigned int i=0; i<ncol_W; i++){
+    delete [] W_active[i];
+    delete [] W_inactive[i];
+  }
+  delete [] W_active;
+  delete [] W_inactive;
+}
+
 void Cmotevo::generate_W(void){
   const int num_sites_sigma = sites_sigma.size(); //number of sites
   num_config_sigma = 1<<num_sites_sigma; //2^num_sites
@@ -17,15 +26,16 @@ void Cmotevo::generate_W(void){
 
 
   //ALLOCATE THE W MATRICES
-  W_active = new double*[num_sites_sigma+1];
-  for(int i=0; i<num_sites_sigma+1; i++) W_active[i] = new double[num_sites_lexA+1];
-
-  W_inactive = new double*[num_sites_sigma+1];
-  for(int i=0; i<num_sites_sigma+1; i++) W_inactive[i] = new double[num_sites_lexA+1];
+  W_active = new double*[nrow_W];
+  W_inactive = new double*[nrow_W];
+  for(unsigned int i=0; i<nrow_W; i++){
+    W_active[i] = new double[ncol_W];
+    W_inactive[i] = new double[ncol_W];
+  }
 
   //Set elements of both W to zero
-  for(int i=0; i<num_sites_sigma+1; i++){
-    for(int j=0; j<num_sites_lexA+1; j++){
+  for(unsigned int i=0; i<nrow_W; i++){
+    for(unsigned int j=0; j<ncol_W; j++){
       W_active[i][j]=1;
       W_inactive[i][j]=1;
     }
@@ -34,9 +44,9 @@ void Cmotevo::generate_W(void){
 
   //LOOP OVER ALL POSSIBLE PAIR OF CONFIGURATIONS OF SIGMA AND LEXA AND FILL W
   int current_num_sigma, current_num_lexA; //number of sigmas or lexAs bound in the current config
-  for(int i=0; i<config_sigma.size(); i++){
+  for(unsigned int i=0; i<config_sigma.size(); i++){
     current_num_sigma = num_sites_config_sigma[i];
-    for(int j=0; j<config_lexA.size(); j++){
+    for(unsigned int j=0; j<config_lexA.size(); j++){
       current_num_lexA = num_sites_config_lexA[j];
       //cout << i << "   " << j << endl;
       if(is_active(config_sigma[i], config_lexA[j])==1){
@@ -59,10 +69,11 @@ void Cmotevo::generate_W(void){
 
   //If some elements of W are 1 it means that no sites have been multiplied, so set them to 0
    //Set elements of both W to zero
-  for(int i=0; i<num_sites_sigma+1; i++){
-    for(int j=0; j<num_sites_lexA+1; j++){
-      if(abs(W_active[i][j]-1)<0.0000001) W_active[i][j]=0;
-      if(abs(W_inactive[i][j]-1)<0.0000001) W_inactive[i][j]=0;
+  for(unsigned int i=0; i<nrow_W; i++){
+    for(unsigned int j=0; j<ncol_W; j++){
+      //The following comparisons is to compare two double. Never compare double with a==b !!
+      if(abs(W_active[i][j]-1)<numeric_limits<double>::epsilon()) W_active[i][j]=0;
+      if(abs(W_inactive[i][j]-1)<numeric_limits<double>::epsilon()) W_inactive[i][j]=0;
     }
   }
 
@@ -148,20 +159,19 @@ void Cmotevo::get_configurations(const vector<dynamic_bitset<>> sites, vector<do
 void Cmotevo::print_configurations(void){
   cerr << endl << "---------------------------------------------------------" << endl;
   cerr << "SIGMA70 SITES and weights: " << endl;
-  for(int i=0; i<sites_sigma.size(); i++)
+  for(unsigned int i=0; i<sites_sigma.size(); i++)
     cerr << sites_sigma[i] << " - " << weight_sites_sigma[i] << endl;
   cerr << "LexA SITES and weights: " << endl;
-  for(int i=0; i<sites_lexA.size(); i++)
+  for(unsigned int i=0; i<sites_lexA.size(); i++)
     cerr << sites_lexA[i] << " - " << weight_sites_lexA[i] << endl;
 
+  cerr << endl << "---------------------------------------------------------" << endl;
   cerr << endl << "SIGMA70 CONFIGURATIONS, weights and number of sites in the config:" << endl;
-  for(int i=0; i<config_sigma.size(); i++)
+  for(unsigned int i=0; i<config_sigma.size(); i++)
     cerr << config_sigma[i] << " - " << weight_config_sigma[i] << " - " << num_sites_config_sigma[i] << endl;
   cerr << endl << "LexA CONFIGURATIONS and weights and number of sites in the config:" << endl;
-  for(int i=0; i<config_lexA.size(); i++)
+  for(unsigned int i=0; i<config_lexA.size(); i++)
     cerr << config_lexA[i] << " - " << weight_config_lexA[i] << " - " << num_sites_config_lexA[i] << endl;
-  cerr << "---------------------------------------------------------" << endl;
-
 }
 
 
@@ -169,8 +179,8 @@ void Cmotevo::print_W(void){
   cerr << endl << "---------------------------------------------------------" << endl;
   cerr << "W MATRICES" << endl;
   cerr << "Active:" << endl;
-  for(int i=0; i<sites_sigma.size()+1; i++){
-    for(int j=0; j<sites_lexA.size()+1; j++){
+  for(unsigned int i=0; i<nrow_W; i++){
+    for(unsigned int j=0; j<ncol_W; j++){
       cout << W_active[i][j] << "   ";
     }
     cout << endl;
@@ -178,76 +188,50 @@ void Cmotevo::print_W(void){
 
   cout << endl;
   cerr << "Inactive:" << endl;
-  for(int i=0; i<sites_sigma.size()+1; i++){
-    for(int j=0; j<sites_lexA.size()+1; j++){
+  for(unsigned int i=0; i<nrow_W; i++){
+    for(unsigned int j=0; j<ncol_W; j++){
       cout << W_inactive[i][j] << "   ";
     }
     cout << endl;
   }
-  cerr << "---------------------------------------------------------" << endl;
+  
 }
 
 
 void Cmotevo::print_W_R(bool active){
   if(active){
     cout << "W_active <- matrix(c(" << W_active[0][0];
-    for(int j=0; j<sites_lexA.size()+1; j++){
-      for(int i=0; i<sites_sigma.size()+1; i++){
-	if(j==0 & i==0) continue;
+    for(unsigned int j=0; j<ncol_W; j++){
+      for(unsigned int i=0; i<nrow_W; i++){
+	if((j==0) & (i==0)) continue;
 	cout << ", " << W_active[i][j];
       }
     }
   }
   else{
     cout << "W_inactive <- matrix(c(" << W_inactive[0][0];
-    for(int j=0; j<sites_lexA.size()+1; j++){
-      for(int i=0; i<sites_sigma.size()+1; i++){
-	if(j==0 & i==0) continue;
+    for(unsigned int j=0; j<ncol_W; j++){
+      for(unsigned int i=0; i<nrow_W; i++){
+	if((j==0) & (i==0)) continue;
 	cout << ", " << W_inactive[i][j];
       }
     }
   }
 
-  cout << "), nrow=" << sites_sigma.size()+1 << ")" << endl;
-
-}
-
-void Cmotevo::print_W_Mathematica(bool active){
-  if(active){
-    cout << "W_active = {{" << W_active[0][0];
-    for(int j=0; j<sites_lexA.size()+1; j++){
-      for(int i=0; i<sites_sigma.size()+1; i++){
-	if(j==0 & i==0) continue;
-	cout << "," << W_active[i][j];
-      }
-      cout << "},{";
-    }
-  }
-  else{
-    cout << "W_inactive = {{" << W_inactive[0][0];
-    for(int j=0; j<sites_lexA.size()+1; j++){
-      for(int i=0; i<sites_sigma.size()+1; i++){
-	if(j==0 & i==0) continue;
-	cout << "," << W_inactive[i][j];
-      }
-      cout << "},{";
-    }
-  }
-
-  cout << "}" << endl;
+  cout << "), nrow=" << nrow_W << ")" << endl;
 
 }
 
 double Cmotevo::compute_P(double C_sigma, double C_lexA){
   //Create vectors with powers of concentrations
   vector<double> sigma, lexA;
-  for(int i=0; i<sites_sigma.size()+1; i++) sigma.push_back(pow(C_sigma, i));
-  for(int i=0; i<sites_lexA.size()+1; i++) lexA.push_back(pow(C_lexA, i));
+  for(unsigned int i=0; i<nrow_W; i++) sigma.push_back(pow(C_sigma, i));
+  for(unsigned int i=0; i<ncol_W; i++) lexA.push_back(pow(C_lexA, i));
 
   vector<double> WLexA_active, WLexA_inactive;
-  for(int i=0; i<sites_sigma.size()+1; i++){
+  for(unsigned int i=0; i<nrow_W; i++){
       double tmp_active=0, tmp_inactive=0;
-    for(int j=0; j<sites_lexA.size(); j++){
+    for(unsigned int j=0; j<ncol_W; j++){
       tmp_active+= W_active[i][j]*lexA[j];
       tmp_inactive+= W_inactive[i][j]*lexA[j];
     }
@@ -256,13 +240,10 @@ double Cmotevo::compute_P(double C_sigma, double C_lexA){
   }
 
   double active=0, inactive=0;
-  for(int i=0; i<sites_sigma.size()+1; i++){
+  for(unsigned int i=0; i<nrow_W; i++){
     active+=WLexA_active[i]*sigma[i];
     inactive+=WLexA_inactive[i]*sigma[i];
   }
 
   return( exp( log(active)-log(active+inactive)) );
-
-
 }
-
