@@ -25,7 +25,10 @@ public:
     vector<double> energy_sigma;
     vector<double> energy_lexA;
     int seq_length;
+    string output_name;
   }file_params; //Will hold the parameters extracted from motevo output file
+
+  string output_name; //name to append to eventually outputted files
 
   bool verbose;
   

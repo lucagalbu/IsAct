@@ -1,3 +1,6 @@
+# Output from the program
+*.txt
+
 # Backup files
 *~
 \#*#

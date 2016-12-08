@@ -1,7 +1,8 @@
-#include <iostream>
 #ifndef __CMOTEVO
 #define __CMOTEVO
 
+#include <iostream>
+#include <fstream>
 #include <vector>
 #include <limits.h>
 #include <numeric>
@@ -38,6 +39,9 @@ public:
 
   //Print the W  matrices
   void print_W(void);
+
+  //Save the matrices to a file called [append_name]_(in)active.txt
+  void save_W(string append_name);
 
   //Print the W matrices in a R format
   void print_W_R(bool active=true); //print activ eor inactive?

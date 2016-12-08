@@ -6,6 +6,7 @@ void CParser::ParseOptions(void){
     desc.add_options()
       ("help,h", "Help screen")
       ("file,f", value<string>(&filename)->required(), "Filename with the results from Motevo")
+      ("ouput,o", value<string>(&output_name)->default_value("output"), "Name to append to eventually outputted files") 
       ("sigma", value<string>(&sigma_name)->default_value("Sigma70_spacer"), "Identifier of sigma70")
       ("lexA", value<string>(&lexA_name)->default_value("LexA"), "Identifier of LexA")
       ("verbose", value<bool>(&verbose)->default_value(true), "Print information on the standard error output")

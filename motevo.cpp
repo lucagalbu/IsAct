@@ -33,11 +33,11 @@ void Cmotevo::generate_W(void){
     W_inactive[i] = new double[ncol_W];
   }
 
-  //Set elements of both W to zero
+  //Set elements of both W to one (=no binding site)
   for(unsigned int i=0; i<nrow_W; i++){
     for(unsigned int j=0; j<ncol_W; j++){
-      W_active[i][j]=1;
-      W_inactive[i][j]=1;
+      W_active[i][j]=0;
+      W_inactive[i][j]=0;
     }
   }
 
@@ -54,29 +54,18 @@ void Cmotevo::generate_W(void){
 	//cout << config_sigma[i] <<  endl;
 	//cout << config_lexA[j]  << endl;
 	//cout << "Weight: " << weight_config_sigma[i]*weight_config_lexA[j] << endl << endl;
-	W_active[current_num_sigma][current_num_lexA]*=weight_config_sigma[i]*weight_config_lexA[j];
+	W_active[current_num_sigma][current_num_lexA]+=weight_config_sigma[i]*weight_config_lexA[j];
       }
       else if(is_active(config_sigma[i], config_lexA[j])==0){
 	//cout << "Inactive with  " << current_num_sigma << " sigma and " << current_num_lexA << " lexA" << endl;
 	//cout << config_sigma[i] <<  endl;
 	//cout << config_lexA[j]  << endl;
 	//cout << "Weight: " << weight_config_sigma[i]*weight_config_lexA[j] << endl << endl;
-	W_inactive[current_num_sigma][current_num_lexA]*=weight_config_sigma[i]*weight_config_lexA[j];
+	W_inactive[current_num_sigma][current_num_lexA]+=weight_config_sigma[i]*weight_config_lexA[j];
       }
       //else cout << "Sigma70 and LexA overlapping" << endl;
     }
   }
-
-  //If some elements of W are 1 it means that no sites have been multiplied, so set them to 0
-   //Set elements of both W to zero
-  for(unsigned int i=0; i<nrow_W; i++){
-    for(unsigned int j=0; j<ncol_W; j++){
-      //The following comparisons is to compare two double. Never compare double with a==b !!
-      if(abs(W_active[i][j]-1)<numeric_limits<double>::epsilon()) W_active[i][j]=0;
-      if(abs(W_inactive[i][j]-1)<numeric_limits<double>::epsilon()) W_inactive[i][j]=0;
-    }
-  }
-
 
 }
 
@@ -221,6 +210,34 @@ void Cmotevo::print_W_R(bool active){
   cout << "), nrow=" << nrow_W << ")" << endl;
 
 }
+
+void Cmotevo::save_W(string append_name){
+  string output_active = append_name + "_active.txt";
+  string output_inactive = append_name + "_inactive.txt";
+  
+  ofstream file_active(output_active);
+  ofstream file_inactive(output_inactive);
+
+  if(file_active.fail() || file_inactive.fail()){
+    cerr << "Error opening the file to save the W matrices" << endl;
+    exit(0);
+  }
+
+  for(unsigned int i=0; i<nrow_W; i++){
+    for(unsigned int j=0; j<ncol_W; j++){
+      file_active << W_active[i][j] << " ";
+      file_inactive << W_inactive[i][j] << " ";
+    }
+    file_active << endl;
+    file_inactive << endl;
+  }
+  
+  file_active.close();
+  file_inactive.close();
+}
+  
+  
+  
 
 double Cmotevo::compute_P(double C_sigma, double C_lexA){
   //Create vectors with powers of concentrations

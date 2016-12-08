@@ -19,9 +19,11 @@ int main(int argc, char** argv){
   }
 
   cerr << endl << "---------------------------------------------------------" << endl;
-  cerr << "W matrix in R format: " << endl;
-  motevo.print_W_R(true);
-  motevo.print_W_R(false);
+  //cerr << "W matrix in R format: " << endl;
+  //  motevo.print_W_R(true);
+  //motevo.print_W_R(false);
+
+  motevo.save_W(parser.output_name);
 
   typedef std::numeric_limits< double > dbl;
   cerr  << endl << "Probability with [sigma]=1, [lexA]=1e-18: " << 
