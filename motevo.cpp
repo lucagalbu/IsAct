@@ -109,19 +109,19 @@ inline int Cmotevo::is_active(const dynamic_bitset<> config_sigma, const dynamic
 void Cmotevo::get_configurations(const vector<dynamic_bitset<>> sites, vector<double>& weight_config,
 				const int num_sites, vector<dynamic_bitset<>>& configurations,
 				const vector<double> weight_sites, vector<int> &num_sites_in_config){
-  const int num_config = 1<<num_sites; //2^num_sites = total number of combinations for the sites (allowed and not)
+  const unsigned int num_config = 1<<num_sites; //2^num_sites = total number of combinations for the sites (allowed and not)
   const size_t length_config = sites[0].size(); //length of one configuration
   vector<dynamic_bitset<>> seq;
 
   //Create the combinations pattern
-  for(int i=0; i<num_config; i++) seq.emplace_back(num_sites, i);
+  for(unsigned int i=0; i<num_config; i++) seq.emplace_back(num_sites, i);
 
   dynamic_bitset<> bit(length_config);
   dynamic_bitset<> config(length_config);
   bool is_valid; //used to know if a config is valid and so must be stored
   double weight_config_tmp; //stores weight of the configuration before checking if the config is valid or not
 
-  for(int j=0; j<num_config; j++){
+  for(unsigned int j=0; j<num_config; j++){
     config.reset();
     is_valid=true;
     weight_config_tmp = 1;

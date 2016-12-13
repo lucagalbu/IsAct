@@ -24,10 +24,10 @@ int main(int argc, char** argv){
   //motevo.print_W_R(false);
 
   motevo.save_W(parser.output_name);
-
+  /*
   typedef std::numeric_limits< double > dbl;
   cerr  << endl << "Probability with [sigma]=1, [lexA]=1e-18: " << 
     setprecision(dbl::max_digits10) << motevo.compute_P(1,1e-18) << endl;
-
+  */
   return(0);
 }

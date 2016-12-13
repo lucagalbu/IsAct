@@ -1,6 +1,9 @@
 # Output from the program
 *.txt
 
+# Mac files
+*DS_Store
+
 # Backup files
 *~
 \#*#
