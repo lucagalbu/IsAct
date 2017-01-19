@@ -239,7 +239,7 @@ void Cmotevo::save_W(string append_name){
   
   
 
-double Cmotevo::compute_P(double C_sigma, double C_lexA){
+double Cmotevo::compute_P(double C_sigma, double C_lexA, bool active=true){
   //Create vectors with powers of concentrations
   vector<double> sigma, lexA;
   for(unsigned int i=0; i<nrow_W; i++) sigma.push_back(pow(C_sigma, i));
@@ -262,5 +262,8 @@ double Cmotevo::compute_P(double C_sigma, double C_lexA){
     inactive+=WLexA_inactive[i]*sigma[i];
   }
 
-  return( exp( log(active)-log(active+inactive)) );
+  double result;
+  if(active) result = exp( log(active)-log(active+inactive));
+  else result = exp( log(inactive)-log(active+inactive))
+  return( result );
 }
