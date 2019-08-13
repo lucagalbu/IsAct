@@ -15,8 +15,8 @@ void CParser::ParseOptions(void){
       ("sigma_left",  value<int>(&sigma_left)->default_value(0), "How much sigma 70 sites are extended to the left")
       ("lexA_right", value<int>(&lexA_right)->default_value(0), "How much lexA sites are extended to the right")
       ("lexA_left",  value<int>(&lexA_left)->default_value(0), "How much lexA sites are extended to the left")
-      ("thres_sigma", value<double>(&thres_sigma)->default_value(4), "Minimal energy for keeping a sigma 70 site")
-      ("thres_lexA",  value<double>(&thres_lexA)->default_value(6), "Minimal energy for keeping a lexA site");
+      ("thres_sigma", value<double>(&thres_sigma)->default_value(-1), "Minimal energy for keeping a sigma 70 site")
+      ("thres_lexA",  value<double>(&thres_lexA)->default_value(-1), "Minimal energy for keeping a lexA site");
       
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -66,9 +66,9 @@ void CParser::ParseFile(void){
   file_params.seq_length = 0; 
 
   while(file>>tmp_str){
-    //Site start and end
+    //Site start and end (the format is e.g. start-end)
     size_t next;
-    site_start = stoi(tmp_str, &next);
+    site_start = stoi(tmp_str, &next); //'next' points to first character in tmp_str which is not a number
     site_end = stoi(tmp_str.substr(++next));
     
     //Strand, Posterior, Promoter, WM, Sequence, Energy

@@ -42,7 +42,7 @@ void Cmotevo::generate_W(void){
   }
 
 
-  //LOOP OVER ALL POSSIBLE PAIR OF CONFIGURATIONS OF SIGMA AND LEXA AND FILL W
+  //LOOP OVER ALL POSSIBLE PAIR OF CONFIGURATIONS OF NON OVERLAPPING SIGMA AND LEXA AND FILL W
   int current_num_sigma, current_num_lexA; //number of sigmas or lexAs bound in the current config
   for(unsigned int i=0; i<config_sigma.size(); i++){
     current_num_sigma = num_sites_config_sigma[i];
@@ -110,7 +110,7 @@ void Cmotevo::get_configurations(const vector<dynamic_bitset<>> sites, vector<do
 				const int num_sites, vector<dynamic_bitset<>>& configurations,
 				const vector<double> weight_sites, vector<int> &num_sites_in_config){
   const unsigned int num_config = 1<<num_sites; //2^num_sites = total number of combinations for the sites (allowed and not)
-  const size_t length_config = sites[0].size(); //length of one configuration
+  const size_t length_config = sites[0].size(); //length of one configuration (length of the sequence)
   vector<dynamic_bitset<>> seq;
 
   //Create the combinations pattern
@@ -136,7 +136,7 @@ void Cmotevo::get_configurations(const vector<dynamic_bitset<>> sites, vector<do
     }
     if(is_valid){
       configurations.push_back(config);
-      num_sites_in_config.push_back(seq[j].count());
+      num_sites_in_config.push_back(seq[j].count()); //How many TF are bound in the j-th config?
       weight_config.push_back(weight_config_tmp);
     }
   }
@@ -239,7 +239,7 @@ void Cmotevo::save_W(string append_name){
   
   
 
-double Cmotevo::compute_P(double C_sigma, double C_lexA, bool active=true){
+double Cmotevo::compute_P(double C_sigma, double C_lexA, bool return_active){
   //Create vectors with powers of concentrations
   vector<double> sigma, lexA;
   for(unsigned int i=0; i<nrow_W; i++) sigma.push_back(pow(C_sigma, i));
@@ -263,7 +263,7 @@ double Cmotevo::compute_P(double C_sigma, double C_lexA, bool active=true){
   }
 
   double result;
-  if(active) result = exp( log(active)-log(active+inactive));
-  else result = exp( log(inactive)-log(active+inactive))
+  if(return_active) result = exp( log(active)-log(active+inactive));
+  else result = exp( log(inactive)-log(active+inactive));
   return( result );
 }

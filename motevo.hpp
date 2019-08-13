@@ -47,7 +47,7 @@ public:
   void print_W_R(bool active=true); //print activ eor inactive?
 
   //Compute the probability to be active. active=return P being active or inactive?
-  double compute_P(double C_sigma, double C_lexA, bool active=true);
+  double compute_P(double C_sigma, double C_lexA, bool return_active=true);
   
   //Dimensions of the matrices W
   unsigned int nrow_W,  ncol_W;

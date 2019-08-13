@@ -20,14 +20,15 @@ int main(int argc, char** argv){
 
   cerr << endl << "---------------------------------------------------------" << endl;
   //cerr << "W matrix in R format: " << endl;
-  //  motevo.print_W_R(true);
-  //motevo.print_W_R(false);
+  motevo.print_W_R(true);
+  motevo.print_W_R(false);
 
-  motevo.save_W(parser.output_name);
-  /*
+  //motevo.print_W();
+  //motevo.save_W(parser.output_name);
+  
   typedef std::numeric_limits< double > dbl;
-  cerr  << endl << "Probability with [sigma]=1, [lexA]=1e-18: " << 
-    setprecision(dbl::max_digits10) << motevo.compute_P(1,1e-18) << endl;
-  */
+  cerr  << endl << "Probability with [sigma]=1.5, [lexA]=0.5: " << 
+    setprecision(dbl::max_digits10) << motevo.compute_P(1.5,0.5) << endl;
+  
   return(0);
 }
